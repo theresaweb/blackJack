@@ -1,2 +1,0 @@
-# blackJack
-Created with CodeSandbox
