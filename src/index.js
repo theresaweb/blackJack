@@ -4,13 +4,52 @@ import Hello from "./Hello";
 import "./index.css";
 
 class Card extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      error: null,
+      isLoaded: false,
+      card: []
+    };
+  }
+  componentDidMount() {
+    // fetch a card
+    fetch(
+      "https://deckofcardsapi.com/api/deck/" +
+        this.props.deckId +
+        "/draw/?count=1"
+    )
+      .then(res => res.json())
+      .then(
+        result => {
+          this.setState({
+            isLoaded: true,
+            card: result.cards[0]
+          });
+        },
+        error => {
+          this.setState({
+            isLoaded: true,
+            error
+          });
+        }
+      );
+  }
   render() {
-    return (
-      <div>
-        <p>{this.props.deckId}</p>
-        <div class="card">Card</div>
-      </div>
-    );
+    const { error, isLoaded, card } = this.state;
+    if (error) {
+      return <div>Error: {error.message}</div>;
+    } else if (!isLoaded) {
+      return <div>Loading...</div>;
+    } else {
+      return (
+        <div>
+          <div class="card">
+            <img src={this.state.card.image} width="40px" height="60px" />
+          </div>
+        </div>
+      );
+    }
   }
 }
 
@@ -18,12 +57,11 @@ class Hand extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      hitMeClicked: false,
-      cardsCount: 0
+      hitMeClicked: false
     };
   }
   renderCard() {
-    return <Card deckId={this.props.deckId} />;
+    return <Card deckId={this.props.deckId} hand={this.props.hand} />;
   }
   handleAddCard = () => {
     this.setState({
@@ -33,7 +71,7 @@ class Hand extends React.Component {
   render() {
     return (
       <div>
-        {this.state.hitMeClicked ? (
+        {this.hitMeClicked ? (
           <div>{this.renderCard()}</div>
         ) : (
           <div>
@@ -54,10 +92,17 @@ class Game extends React.Component {
       error: null,
       isLoaded: false,
       deckId: "",
-      cards: []
+      hand: [
+        {
+          cards: [],
+          cardsCount: 0,
+          isOver: false
+        }
+      ]
     };
   }
   componentDidMount() {
+    // fetch a deck ID
     fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
       .then(res => res.json())
       .then(
@@ -76,13 +121,26 @@ class Game extends React.Component {
       );
   }
   render() {
+    //show status
+    let status;
+    if (this.state.hand.isOver) {
+      status = "You Lose";
+    } else {
+      status = "Still under 21";
+    }
+    // render the hand
     const { error, isLoaded, deckId } = this.state;
     if (error) {
       return <div>Error: {error.message}</div>;
     } else if (!isLoaded) {
       return <div>Loading...</div>;
     } else {
-      return <Hand deckId={deckId} cards={this.state.cards} />;
+      return (
+        <div class="game">
+          <div>{status}</div>
+          <Hand deckId={deckId} hand={this.state.hand} />
+        </div>
+      );
     }
   }
 }
