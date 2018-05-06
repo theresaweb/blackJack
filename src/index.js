@@ -4,25 +4,55 @@ import Hello from "./Hello";
 import "./index.css";
 
 function Card(props) {
-  return (
-    <div>
-      <div class="card">Card</div>
-    </div>
-  );
+  return <div class="card">Card</div>;
 }
 
 class Hand extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      hitMeClicked: false
+    };
+  }
   renderCard() {
     return <Card />;
+  }
+  handleAddCard = () => {
+    this.setState({
+      hitMeClicked: true
+    });
+  };
+  hitMeClick() {
+    /* const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    const current = history[history.length - 1];
+    const squares = current.squares.slice();
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+    squares[i] = this.state.xIsNext ? "X" : "O";
+    this.setState({
+      history: history.concat([
+        {
+          squares: squares
+        }
+      ]),
+      stepNumber: history.length,
+      xIsNext: !this.state.xIsNext
+    });*/
   }
   render() {
     return (
       <div>
-        <div>{this.props.deckId}</div>
-        <div className="hand-row">
-          {this.renderCard()}
-          {this.renderCard()}
-        </div>
+        {this.state.hitMeClicked ? (
+          <div>{this.renderCard()}</div>
+        ) : (
+          <div>
+            {this.renderCard()}
+            {this.renderCard()}
+          </div>
+        )}
+
+        <button onClick={this.handleAddCard}>Hit Me</button>
       </div>
     );
   }
@@ -57,24 +87,6 @@ class Game extends React.Component {
           });
         }
       );
-  }
-  hitMeClick(i) {
-    /* const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const current = history[history.length - 1];
-    const squares = current.squares.slice();
-    if (calculateWinner(squares) || squares[i]) {
-      return;
-    }
-    squares[i] = this.state.xIsNext ? "X" : "O";
-    this.setState({
-      history: history.concat([
-        {
-          squares: squares
-        }
-      ]),
-      stepNumber: history.length,
-      xIsNext: !this.state.xIsNext
-    });*/
   }
   render() {
     const { error, isLoaded, deckId } = this.state;
