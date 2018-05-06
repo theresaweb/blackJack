@@ -71,7 +71,7 @@ class Hand extends React.Component {
   render() {
     return (
       <div>
-        {this.hitMeClicked ? (
+        {this.state.hitMeClicked ? (
           <div>{this.renderCard()}</div>
         ) : (
           <div>
