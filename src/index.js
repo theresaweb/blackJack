@@ -1,24 +1,63 @@
 import React from "react";
 import { render } from "react-dom";
 import Hello from "./Hello";
-import Styles from "./index.css";
+import "./index.css";
 
-const styles = {
-  fontFamily: "sans-serif",
-  textAlign: "center"
-};
+function Card(props) {
+  return (
+    <div>
+      <div class="card">Card</div>
+    </div>
+  );
+}
 
+class Hand extends React.Component {
+  renderCard() {
+    return <Card />;
+  }
+  render() {
+    return (
+      <div>
+        <div>{this.props.deckId}</div>
+        <div className="hand-row">
+          {this.renderCard()}
+          {this.renderCard()}
+        </div>
+      </div>
+    );
+  }
+}
 class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      error: null,
+      isLoaded: false,
       theDeck: [],
-      theCard: {}
+      deckId: "",
+      theCard: []
       //stepNumber: 0,
       //xIsNext: true
     };
   }
-
+  componentDidMount() {
+    fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
+      .then(res => res.json())
+      .then(
+        result => {
+          this.setState({
+            isLoaded: true,
+            deckId: result.deck_id
+          });
+        },
+        error => {
+          this.setState({
+            isLoaded: true,
+            error
+          });
+        }
+      );
+  }
   hitMeClick(i) {
     /* const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
@@ -37,27 +76,20 @@ class Game extends React.Component {
       xIsNext: !this.state.xIsNext
     });*/
   }
-
   render() {
-    //const winner = calculateWinner(current.squares);
-
-    /*let status;
-    if (winner) {
-      status = "Winner: " + winner;
+    const { error, isLoaded, deckId } = this.state;
+    if (error) {
+      return <div>Error: {error.message}</div>;
+    } else if (!isLoaded) {
+      return <div>Loading...</div>;
     } else {
-      status = "Next player: " + (this.state.xIsNext ? "X" : "O");
-    }*/
-
-    return (
-      <div className="game">
-        <div className="game-board">{/* return hand and hit me button */}</div>
-      </div>
-    );
+      return <Hand deckId={deckId} />;
+    }
   }
 }
 
 const Header = () => (
-  <div style={styles}>
+  <div>
     <Hello name="Player" />
   </div>
 );
