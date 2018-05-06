@@ -3,43 +3,33 @@ import { render } from "react-dom";
 import Hello from "./Hello";
 import "./index.css";
 
-function Card(props) {
-  return <div class="card">Card</div>;
+class Card extends React.Component {
+  render() {
+    return (
+      <div>
+        <p>{this.props.deckId}</p>
+        <div class="card">Card</div>
+      </div>
+    );
+  }
 }
 
 class Hand extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      hitMeClicked: false
+      hitMeClicked: false,
+      cardsCount: 0
     };
   }
   renderCard() {
-    return <Card />;
+    return <Card deckId={this.props.deckId} />;
   }
   handleAddCard = () => {
     this.setState({
       hitMeClicked: true
     });
   };
-  hitMeClick() {
-    /* const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const current = history[history.length - 1];
-    const squares = current.squares.slice();
-    if (calculateWinner(squares) || squares[i]) {
-      return;
-    }
-    squares[i] = this.state.xIsNext ? "X" : "O";
-    this.setState({
-      history: history.concat([
-        {
-          squares: squares
-        }
-      ]),
-      stepNumber: history.length,
-      xIsNext: !this.state.xIsNext
-    });*/
-  }
   render() {
     return (
       <div>
@@ -63,11 +53,8 @@ class Game extends React.Component {
     this.state = {
       error: null,
       isLoaded: false,
-      theDeck: [],
       deckId: "",
-      theCard: []
-      //stepNumber: 0,
-      //xIsNext: true
+      cards: []
     };
   }
   componentDidMount() {
@@ -95,7 +82,7 @@ class Game extends React.Component {
     } else if (!isLoaded) {
       return <div>Loading...</div>;
     } else {
-      return <Hand deckId={deckId} />;
+      return <Hand deckId={deckId} cards={this.state.cards} />;
     }
   }
 }
@@ -108,3 +95,16 @@ const Header = () => (
 
 render(<Header />, document.getElementById("header"));
 render(<Game />, document.getElementById("game"));
+
+function calculateOver(cards) {
+  const max = 21;
+  const over = false;
+  for (let i = 0; i < cards.length; i++) {
+    if (cards[i].numValue > max) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  return null;
+}
