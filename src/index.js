@@ -9,8 +9,7 @@ class Card extends React.Component {
     this.state = {
       error: null,
       isLoaded: false,
-      card: [],
-      cards: []
+      card: []
     };
   }
   componentDidMount() {
@@ -25,8 +24,7 @@ class Card extends React.Component {
         result => {
           this.setState({
             isLoaded: true,
-            card: result.cards[0],
-            hand: []
+            card: result.cards[0]
           });
         },
         error => {
@@ -65,6 +63,8 @@ class Hand extends React.Component {
     return <Card deckId={this.props.deckId} hand={this.props.hand} />;
   }
   handleAddCard = () => {
+    const thisHand = this.state.hand.slice();
+    const cards = thisHand.cards.slice();
     this.setState({
       gameReset: false
     });
@@ -123,7 +123,12 @@ class Game extends React.Component {
   }
   gameReset = () => {
     this.setState({
-      gameReset: true
+      gameReset: true,
+      hand: [
+        {
+          isOver: false
+        }
+      ]
     });
   };
   render() {
@@ -149,7 +154,6 @@ class Game extends React.Component {
             gameReset={this.state.gameReset}
             hand={this.state.hand}
           />
-          <div>{deckId}</div>
           <button
             onClick={() => {
               this.gameReset();
