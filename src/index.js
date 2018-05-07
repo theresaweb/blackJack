@@ -94,6 +94,7 @@ class Game extends React.Component {
       isLoaded: false,
       deckId: "",
       gameReset: false,
+      thisDeal: [],
       hand: [
         {
           cards: [],
@@ -103,7 +104,7 @@ class Game extends React.Component {
     };
   }
   componentDidMount() {
-    // fetch a deck ID
+    // fetch a shuffled deck
     fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
       .then(res => res.json())
       .then(
@@ -119,11 +120,29 @@ class Game extends React.Component {
             error
           });
         }
+      )
+      .then(
+        fetch("https://deckofcardsapi.com/api/deck/bt6q10mmtcuu/draw/?count=52")
+          .then(deckRes => deckRes.json())
+          .then(
+            deckResult => {
+              this.setState({
+                thisDeal: deckResult.cards
+              });
+            },
+            error => {
+              this.setState({
+                isLoaded: true,
+                error
+              });
+            }
+          )
       );
   }
   gameReset = () => {
     this.setState({
       gameReset: true,
+      thisDeal: [],
       hand: [
         {
           isOver: false
@@ -140,7 +159,12 @@ class Game extends React.Component {
       status = "Hand under 21";
     }
     // render the hand
-    const { error, isLoaded, deckId } = this.state;
+    const { error, isLoaded, deckId, thisDeal } = this.state;
+    const listCards = thisDeal.map(card => (
+      <li key={card.code}>
+        {card.value} of {card.suit}
+      </li>
+    ));
     if (error) {
       return <div>Error: {error.message}</div>;
     } else if (!isLoaded) {
@@ -149,6 +173,12 @@ class Game extends React.Component {
       return (
         <div class="game">
           <div>{status}</div>
+          <div>
+            <ul>
+              <li>list cards</li>
+              {listCards}
+            </ul>
+          </div>
           <Hand
             deckId={deckId}
             gameReset={this.state.gameReset}
