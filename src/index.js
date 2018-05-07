@@ -71,14 +71,7 @@ class Hand extends React.Component {
   render() {
     return (
       <div>
-        {this.state.hitMeClicked ? (
-          <div>{this.renderCard()}</div>
-        ) : (
-          <div>
-            {this.renderCard()}
-            {this.renderCard()}
-          </div>
-        )}
+        {this.state.hitMeClicked ? <div>{this.renderCard()}</div> : <div />}
 
         <button onClick={this.handleAddCard}>Hit Me</button>
       </div>
@@ -120,6 +113,13 @@ class Game extends React.Component {
         }
       );
   }
+  startGame(deckId, hand) {
+    return (
+      <div>
+        <Card deckId="sj7kq35l6vmb" />
+      </div>
+    );
+  }
   render() {
     //show status
     let status;
@@ -139,6 +139,14 @@ class Game extends React.Component {
         <div class="game">
           <div>{status}</div>
           <Hand deckId={deckId} hand={this.state.hand} />
+          <div>{deckId}</div>
+          <button
+            onClick={() => {
+              this.startGame("sj7kq35l6vmb", this.state.hand);
+            }}
+          >
+            Start Game
+          </button>
         </div>
       );
     }
