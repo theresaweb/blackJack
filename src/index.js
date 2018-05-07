@@ -45,7 +45,12 @@ class Card extends React.Component {
       return (
         <div>
           <div class="card">
-            <img src={this.state.card.image} width="40px" height="60px" />
+            <img
+              alt="{this.state.card.code}"
+              src={this.state.card.image}
+              width="40px"
+              height="60px"
+            />
           </div>
         </div>
       );
@@ -54,25 +59,26 @@ class Card extends React.Component {
 }
 
 class Hand extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      hitMeClicked: false
-    };
-  }
   renderCard() {
     return <Card deckId={this.props.deckId} hand={this.props.hand} />;
   }
   handleAddCard = () => {
     this.setState({
-      hitMeClicked: true
+      gameReset: false
     });
   };
   render() {
     return (
       <div>
-        {this.state.hitMeClicked ? <div>{this.renderCard()}</div> : <div />}
-
+        <div>game reset is {this.props.gameReset.toString()}</div>
+        {this.props.gameReset ? (
+          <div>
+            {this.renderCard()}
+            {this.renderCard()}
+          </div>
+        ) : (
+          <div>{this.renderCard()}</div>
+        )}
         <button onClick={this.handleAddCard}>Hit Me</button>
       </div>
     );
@@ -85,10 +91,10 @@ class Game extends React.Component {
       error: null,
       isLoaded: false,
       deckId: "",
+      gameReset: false,
       hand: [
         {
           cards: [],
-          cardsCount: 0,
           isOver: false
         }
       ]
@@ -113,20 +119,18 @@ class Game extends React.Component {
         }
       );
   }
-  startGame(deckId, hand) {
-    return (
-      <div>
-        <Card deckId="sj7kq35l6vmb" />
-      </div>
-    );
-  }
+  gameReset = () => {
+    this.setState({
+      gameReset: true
+    });
+  };
   render() {
     //show status
     let status;
     if (this.state.hand.isOver) {
       status = "You Lose";
     } else {
-      status = "Still under 21";
+      status = "Hand under 21";
     }
     // render the hand
     const { error, isLoaded, deckId } = this.state;
@@ -138,11 +142,15 @@ class Game extends React.Component {
       return (
         <div class="game">
           <div>{status}</div>
-          <Hand deckId={deckId} hand={this.state.hand} />
+          <Hand
+            deckId={deckId}
+            gameReset={this.state.gameReset}
+            hand={this.state.hand}
+          />
           <div>{deckId}</div>
           <button
             onClick={() => {
-              this.startGame("sj7kq35l6vmb", this.state.hand);
+              this.gameReset();
             }}
           >
             Start Game
