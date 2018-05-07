@@ -9,7 +9,8 @@ class Card extends React.Component {
     this.state = {
       error: null,
       isLoaded: false,
-      card: []
+      card: [],
+      cards: []
     };
   }
   componentDidMount() {
@@ -24,7 +25,8 @@ class Card extends React.Component {
         result => {
           this.setState({
             isLoaded: true,
-            card: result.cards[0]
+            card: result.cards[0],
+            hand: []
           });
         },
         error => {
@@ -36,7 +38,7 @@ class Card extends React.Component {
       );
   }
   render() {
-    const { error, isLoaded, card } = this.state;
+    const { error, isLoaded } = this.state;
     if (error) {
       return <div>Error: {error.message}</div>;
     } else if (!isLoaded) {
