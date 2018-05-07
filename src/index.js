@@ -7,79 +7,59 @@ class Card extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      error: null,
-      isLoaded: false,
-      card: []
+      card: this.props.thisCard
     };
   }
-  componentDidMount() {
-    // fetch a card
-    fetch(
-      "https://deckofcardsapi.com/api/deck/" +
-        this.props.deckId +
-        "/draw/?count=1"
-    )
-      .then(res => res.json())
-      .then(
-        result => {
-          this.setState({
-            isLoaded: true,
-            card: result.cards[0]
-          });
-        },
-        error => {
-          this.setState({
-            isLoaded: true,
-            error
-          });
-        }
-      );
-  }
   render() {
-    const { error, isLoaded } = this.state;
-    if (error) {
-      return <div>Error: {error.message}</div>;
-    } else if (!isLoaded) {
-      return <div>Loading...</div>;
-    } else {
-      return (
-        <div>
-          <div class="card">
-            <img
-              alt="{this.state.card.code}"
-              src={this.state.card.image}
-              width="40px"
-              height="60px"
-            />
-          </div>
+    return (
+      <div>
+        <div class="card">
+          <img
+            alt={this.state.card.value}
+            src={this.state.card.image}
+            width="40px"
+            height="60px"
+          />
         </div>
-      );
-    }
+      </div>
+    );
   }
 }
 
 class Hand extends React.Component {
-  renderCard() {
-    return <Card deckId={this.props.deckId} hand={this.props.hand} />;
+  renderCard(dealNum) {
+    return (
+      <Card
+        thisCard={this.props.thisDeal[dealNum]}
+        hand={this.props.hand}
+        dealNumber={this.props.dealNumber}
+      />
+    );
   }
-  handleAddCard = () => {
-    const thisHand = this.state.hand.slice();
-    const cards = thisHand.cards.slice();
+  handleAddCard() {
+    const thisHand = this.props.hand.slice();
     this.setState({
-      gameReset: false
+      gameReset: false,
+      dealNumber: this.props.dealNumber + 1,
+      hand: thisHand.concat([
+        {
+          cards: this.state.card
+        }
+      ])
     });
-  };
+    this.renderCard(this.props.dealNumber);
+  }
   render() {
     return (
       <div>
-        <div>game reset is {this.props.gameReset.toString()}</div>
-        {this.props.gameReset ? (
-          <div>
-            {this.renderCard()}
-            {this.renderCard()}
-          </div>
+        <div>
+          game reset is {this.props.gameReset.toString()} and{" "}
+          {this.props.dealNumber}
+        </div>
+        {this.props.dealNumber < 1 ? (
+          this.renderCard(this.props.dealNumber)
         ) : (
-          <div>{this.renderCard()}</div>
+          <div />
         )}
         <button onClick={this.handleAddCard}>Hit Me</button>
       </div>
@@ -92,8 +72,8 @@ class Game extends React.Component {
     this.state = {
       error: null,
       isLoaded: false,
-      deckId: "",
-      gameReset: false,
+      gameReset: true,
+      dealNumber: 0,
       thisDeal: [],
       hand: [
         {
@@ -107,49 +87,42 @@ class Game extends React.Component {
     // fetch a shuffled deck
     fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
       .then(res => res.json())
+      .then(shuffledCards =>
+        fetch(
+          "https://deckofcardsapi.com/api/deck/" +
+            shuffledCards.deck_id +
+            "/draw/?count=52"
+        )
+      )
+      .then(res => res.json())
       .then(
-        result => {
+        deckResult => {
           this.setState({
             isLoaded: true,
-            deckId: result.deck_id
+            thisDeal: deckResult.cards
           });
         },
         error => {
           this.setState({
             isLoaded: true,
-            error
+            error: error
           });
         }
-      )
-      .then(
-        fetch("https://deckofcardsapi.com/api/deck/bt6q10mmtcuu/draw/?count=52")
-          .then(deckRes => deckRes.json())
-          .then(
-            deckResult => {
-              this.setState({
-                thisDeal: deckResult.cards
-              });
-            },
-            error => {
-              this.setState({
-                isLoaded: true,
-                error
-              });
-            }
-          )
       );
   }
-  gameReset = () => {
+  gameReset() {
     this.setState({
       gameReset: true,
+      dealNumber: 0,
       thisDeal: [],
       hand: [
         {
+          cards: [],
           isOver: false
         }
       ]
     });
-  };
+  }
   render() {
     //show status
     let status;
@@ -158,30 +131,23 @@ class Game extends React.Component {
     } else {
       status = "Hand under 21";
     }
-    // render the hand
-    const { error, isLoaded, deckId, thisDeal } = this.state;
-    const listCards = thisDeal.map(card => (
+    /* const listCards = thisDeal.map(card => (
       <li key={card.code}>
         {card.value} of {card.suit}
       </li>
-    ));
-    if (error) {
-      return <div>Error: {error.message}</div>;
-    } else if (!isLoaded) {
+    ));*/
+    if (this.state.error) {
+      return <div>Error: {this.state.error.message}</div>;
+    } else if (!this.state.isLoaded) {
       return <div>Loading...</div>;
     } else {
       return (
         <div class="game">
           <div>{status}</div>
-          <div>
-            <ul>
-              <li>list cards</li>
-              {listCards}
-            </ul>
-          </div>
           <Hand
-            deckId={deckId}
+            thisDeal={this.state.thisDeal}
             gameReset={this.state.gameReset}
+            dealNumber={this.state.dealNumber}
             hand={this.state.hand}
           />
           <button
