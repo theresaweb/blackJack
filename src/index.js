@@ -2,33 +2,9 @@ import React from "react";
 import { render } from "react-dom";
 import Hello from "./Hello";
 import "./index.css";
-
-class Card extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      thisCard: this.props.thisCard,
-      hand: this.props.hand,
-      dealNumber: this.props.dealNumber
-    };
-  }
-  render() {
-    return (
-      <div>
-        <div>dealnumber in Card is {this.state.dealNumber}</div>
-        <div class="card">
-          <img
-            alt={this.state.thisCard.value}
-            src={this.state.thisCard.image}
-            width="40px"
-            height="60px"
-          />
-        </div>
-      </div>
-    );
-  }
+function Card(props) {
+  return <img src={props.value.image} alt={props.value.value} width="40" />;
 }
-
 class Hand extends React.Component {
   constructor(props) {
     super(props);
@@ -39,28 +15,13 @@ class Hand extends React.Component {
       hand: this.props.hand
     };
   }
-  renderCard() {
-    return (
-      <div>
-        <div>dealnumber in rendercard is {this.state.dealNumber}</div>
-        <Card
-          thisCard={this.state.thisDeal[this.state.dealNumber]}
-          hand={this.state.hand}
-          dealNumber={this.state.dealNumber}
-        />
-      </div>
-    );
+  renderCard(i) {
+    return <Card value={this.props.hand[i]} />;
   }
   render() {
-    return (
-      <div>
-        <div>
-          game reset is {this.state.gameReset.toString()} and{" "}
-          {this.state.dealNumber}
-        </div>
-        <div>{this.renderCard()}</div>
-      </div>
-    );
+    return this.props.hand.map((card, index) => (
+      <div class="card">{this.renderCard(index)}</div>
+    ));
   }
 }
 class Game extends React.Component {
@@ -70,7 +31,7 @@ class Game extends React.Component {
       error: null,
       isLoaded: false,
       gameReset: true,
-      dealNumber: 0,
+      dealNumber: 1,
       thisDeal: [],
       hand: [
         {
@@ -107,6 +68,15 @@ class Game extends React.Component {
         }
       );
   }
+  handleAddCard() {
+    // updating state here should update hand
+    const incNum = this.state.dealNumber + 1;
+    this.setState((prevState, props) => ({
+      dealNumber: incNum,
+      thisCard: prevState.thisDeal[incNum],
+      hand: prevState.thisDeal.slice(0, prevState.dealNumber)
+    }));
+  }
   gameReset() {
     this.setState({
       gameReset: true,
@@ -120,12 +90,6 @@ class Game extends React.Component {
       ]
     });
   }
-  handleAddCard() {
-    const incNum = this.state.dealNumber + 1;
-    this.setState((prevState, props) => ({
-      dealNumber: incNum
-    }));
-  }
   render() {
     //show status
     let status;
@@ -134,16 +98,12 @@ class Game extends React.Component {
     } else {
       status = "Hand under 21";
     }
-    /* const listCards = thisDeal.map(card => (
-      <li key={card.code}>
-        {card.value} of {card.suit}
-      </li>
-    ));*/
     if (this.state.error) {
       return <div>Error: {this.state.error.message}</div>;
     } else if (!this.state.isLoaded) {
       return <div>Loading...</div>;
     } else {
+      const dealSize = this.state.dealNumber + 1;
       return (
         <div class="game">
           <div>{status}</div>
@@ -152,7 +112,7 @@ class Game extends React.Component {
             thisDeal={this.state.thisDeal}
             gameReset={this.state.gameReset}
             dealNumber={this.state.dealNumber}
-            hand={this.state.hand}
+            hand={this.state.thisDeal.slice(0, dealSize)}
           />
           <button
             onClick={() => {
