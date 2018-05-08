@@ -2,6 +2,7 @@ import React from "react";
 import { render } from "react-dom";
 import Hello from "./Hello";
 import "./index.css";
+
 function Card(props) {
   return <img src={props.value.image} alt={props.value.value} width="40" />;
 }
@@ -33,12 +34,8 @@ class Game extends React.Component {
       gameReset: true,
       dealNumber: 1,
       thisDeal: [],
-      hand: [
-        {
-          cards: [],
-          isOver: false
-        }
-      ]
+      hand: [],
+      isOver: false
     };
   }
   componentDidMount() {
@@ -76,6 +73,12 @@ class Game extends React.Component {
       thisCard: prevState.thisDeal[incNum],
       hand: prevState.thisDeal.slice(0, prevState.dealNumber)
     }));
+    const curHand = this.state.hand.slice();
+    if (calculateOver(this.state.hand)) {
+      this.setState((prevState, props) => ({
+        isOver: true
+      }));
+    }
   }
   gameReset() {
     this.setState({
@@ -93,7 +96,7 @@ class Game extends React.Component {
   render() {
     //show status
     let status;
-    if (this.state.hand.isOver) {
+    if (this.state.isOver) {
       status = "You Lose";
     } else {
       status = "Hand under 21";
@@ -136,15 +139,14 @@ const Header = () => (
 render(<Header />, document.getElementById("header"));
 render(<Game />, document.getElementById("game"));
 
-function calculateOver(cards) {
+function calculateOver(hand) {
   const max = 21;
-  const over = false;
-  for (let i = 0; i < cards.length; i++) {
-    if (cards[i].numValue > max) {
+  for (let i = 0; i < hand.length; i++) {
+    if (hand[i].value > max) {
       return true;
     } else {
-      return false;
+      return true;
     }
   }
-  return null;
+  return true;
 }
