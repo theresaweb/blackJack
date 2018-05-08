@@ -2,6 +2,7 @@ import React from "react";
 import { render } from "react-dom";
 import Hello from "./Hello";
 import "./index.css";
+import Uuid4 from "uuid4";
 
 function Card(props) {
   return <img src={props.value.image} alt={props.value.value} width="40" />;
@@ -33,8 +34,7 @@ class Game extends React.Component {
       dealNumber: 1,
       thisDeal: [],
       hand: [],
-      isOver: false,
-      cardTotal: 0
+      isOver: false
     };
   }
   componentDidMount() {
@@ -73,10 +73,10 @@ class Game extends React.Component {
       hand: prevState.thisDeal.slice(0, prevState.dealNumber)
     }));
     var total = calculateOver(this.state.hand);
+    console.log(total);
     if (total > 21) {
       this.setState((prevState, props) => ({
-        isOver: true,
-        cardTotal: { total }
+        isOver: true
       }));
     }
   }
@@ -87,10 +87,9 @@ class Game extends React.Component {
       dealNumber: 1,
       thisDeal: [],
       hand: [],
-      isOver: false,
-      cardTotal: 0
+      isOver: false
     });
-    render(<Game key={"uniqueID"} />, document.getElementById("game"));
+    render(<Game key={Uuid4()} />, document.getElementById("game"));
   }
   render() {
     //show status
@@ -108,7 +107,7 @@ class Game extends React.Component {
       const dealSize = this.state.dealNumber + 1;
       return (
         <div className="game">
-          <div>{this.state.cardTotal}</div>
+          <div>{status}</div>
           <div>
             <button
               className="hitmeBtn"
@@ -140,7 +139,7 @@ const Header = () => (
 );
 
 render(<Header />, document.getElementById("header"));
-render(<Game />, document.getElementById("game"));
+render(<Game key={Uuid4()} />, document.getElementById("game"));
 
 function calculateOver(hand) {
   var total = 0;
@@ -153,10 +152,10 @@ function calculateOver(hand) {
     ) {
       formattedHand[i] = 10;
     } else {
-      formattedHand[i] = hand[i].value;
+      formattedHand[i] = Number(hand[i].value);
     }
   }
-  for (let i = 0; i < formattedHand.length; i++) {
+  for (let i = 2; i < formattedHand.length; i++) {
     total += formattedHand[i];
   }
   return total;
