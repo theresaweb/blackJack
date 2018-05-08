@@ -11,7 +11,6 @@ class Hand extends React.Component {
     super(props);
     this.state = {
       thisDeal: this.props.thisDeal,
-      gameReset: this.props.gameReset,
       dealNumber: this.props.dealNumber,
       hand: this.props.hand
     };
@@ -21,7 +20,7 @@ class Hand extends React.Component {
   }
   render() {
     return this.props.hand.map((card, index) => (
-      <div class="card">{this.renderCard(index)}</div>
+      <div className="card">{this.renderCard(index)}</div>
     ));
   }
 }
@@ -31,11 +30,11 @@ class Game extends React.Component {
     this.state = {
       error: null,
       isLoaded: false,
-      gameReset: true,
       dealNumber: 1,
       thisDeal: [],
       hand: [],
-      isOver: false
+      isOver: false,
+      cardTotal: 0
     };
   }
   componentDidMount() {
@@ -73,25 +72,25 @@ class Game extends React.Component {
       thisCard: prevState.thisDeal[incNum],
       hand: prevState.thisDeal.slice(0, prevState.dealNumber)
     }));
-    const curHand = this.state.hand.slice();
-    if (calculateOver(this.state.hand)) {
+    var total = calculateOver(this.state.hand);
+    if (total > 21) {
       this.setState((prevState, props) => ({
-        isOver: true
+        isOver: true,
+        cardTotal: { total }
       }));
     }
   }
   gameReset() {
     this.setState({
-      gameReset: true,
-      dealNumber: 0,
+      error: null,
+      isLoaded: false,
+      dealNumber: 1,
       thisDeal: [],
-      hand: [
-        {
-          cards: [],
-          isOver: false
-        }
-      ]
+      hand: [],
+      isOver: false,
+      cardTotal: 0
     });
+    render(<Game key={"uniqueID"} />, document.getElementById("game"));
   }
   render() {
     //show status
@@ -108,22 +107,26 @@ class Game extends React.Component {
     } else {
       const dealSize = this.state.dealNumber + 1;
       return (
-        <div class="game">
-          <div>{status}</div>
-          <button onClick={this.handleAddCard.bind(this)}>Hit Me</button>
+        <div className="game">
+          <div>{this.state.cardTotal}</div>
+          <div>
+            <button
+              className="hitmeBtn"
+              onClick={this.handleAddCard.bind(this)}
+            >
+              Hit Me
+            </button>
+          </div>
           <Hand
             thisDeal={this.state.thisDeal}
-            gameReset={this.state.gameReset}
             dealNumber={this.state.dealNumber}
             hand={this.state.thisDeal.slice(0, dealSize)}
           />
-          <button
-            onClick={() => {
-              this.gameReset();
-            }}
-          >
-            Start Game
-          </button>
+          <div>
+            <button className="resetBtn" onClick={this.gameReset.bind(this)}>
+              Start Game
+            </button>
+          </div>
         </div>
       );
     }
@@ -140,13 +143,21 @@ render(<Header />, document.getElementById("header"));
 render(<Game />, document.getElementById("game"));
 
 function calculateOver(hand) {
-  const max = 21;
-  for (let i = 0; i < hand.length; i++) {
-    if (hand[i].value > max) {
-      return true;
+  var total = 0;
+  var formattedHand = [];
+  for (var i = 0; i < hand.length; i++) {
+    if (
+      hand[i].value === "JACK" ||
+      hand[i].value === "QUEEN" ||
+      hand[i].value === "KING"
+    ) {
+      formattedHand[i] = 10;
     } else {
-      return true;
+      formattedHand[i] = hand[i].value;
     }
   }
-  return true;
+  for (let i = 0; i < formattedHand.length; i++) {
+    total += formattedHand[i];
+  }
+  return total;
 }
