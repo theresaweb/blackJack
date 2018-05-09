@@ -18,8 +18,8 @@ class Hand extends React.Component {
     };
   }
   handleAddCard() {
+    //updates state which re-renders hand with new card
     const incNum = this.state.dealNumber + 1;
-    console.log("incnum " + incNum);
     this.setState({
       dealNumber: incNum,
       thisCard: this.state.thisDeal[incNum],
@@ -82,7 +82,7 @@ class Game extends React.Component {
       dealNumber: 1,
       thisDeal: [],
       hand: [],
-      isOver: "Count is under 21"
+      isOver: false
     };
   }
   componentDidMount() {
@@ -119,7 +119,7 @@ class Game extends React.Component {
       dealNumber: 1,
       thisDeal: [],
       hand: [],
-      isOver: "Count is under 21"
+      isOver: false
     });
     render(<Game key={Uuid4()} />, document.getElementById("game"));
   }
