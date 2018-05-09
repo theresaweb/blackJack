@@ -13,14 +13,15 @@ class Hand extends React.Component {
     this.state = {
       thisDeal: this.props.thisDeal,
       dealNumber: this.props.dealNumber,
-      hand: this.props.hand
+      hand: this.props.hand,
+      isOver: this.props.isOver
     };
   }
   renderCard(i) {
-    return <Card value={this.props.hand[i]} />;
+    return <Card key={Uuid4()} value={this.state.hand[i]} />;
   }
   render() {
-    return this.props.hand.map((card, index) => (
+    return this.state.hand.map((card, index) => (
       <div className="card">{this.renderCard(index)}</div>
     ));
   }
@@ -67,13 +68,13 @@ class Game extends React.Component {
   handleAddCard() {
     // updating state here should update hand
     const incNum = this.state.dealNumber + 1;
-    this.setState((prevState, props) => ({
+    this.setState({
       dealNumber: incNum,
-      thisCard: prevState.thisDeal[incNum],
-      hand: prevState.thisDeal.slice(0, prevState.dealNumber)
-    }));
+      thisCard: this.state.thisDeal[incNum],
+      hand: this.state.thisDeal.slice(0, this.state.dealNumber),
+      isOver: this.state.isOver
+    });
     var total = calculateOver(this.state.hand);
-    console.log(total);
     if (total > 21) {
       this.setState((prevState, props) => ({
         isOver: true
@@ -117,13 +118,14 @@ class Game extends React.Component {
             </button>
           </div>
           <Hand
+            key={Uuid4()}
             thisDeal={this.state.thisDeal}
             dealNumber={this.state.dealNumber}
             hand={this.state.thisDeal.slice(0, dealSize)}
           />
           <div>
             <button className="resetBtn" onClick={this.gameReset.bind(this)}>
-              Start Game
+              Restart Game
             </button>
           </div>
         </div>
