@@ -8,59 +8,20 @@ function Card(props) {
   return <img src={props.value.image} alt={props.value.value} width="40" />;
 }
 class Hand extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      thisDeal: this.props.thisDeal,
-      dealNumber: this.props.dealNumber,
-      hand: this.props.hand,
-      isOver: this.props.isOver
-    };
-  }
-  handleAddCard() {
-    //updates state which re-renders hand with new card
-    const incNum = this.state.dealNumber + 1;
-    this.setState({
-      dealNumber: incNum,
-      thisCard: this.state.thisDeal[incNum],
-      hand: this.state.thisDeal.slice(0, incNum + 1),
-      isOver: this.state.isOver
-    });
-  }
   renderCard(i) {
-    return <Card key={Uuid4()} value={this.state.hand[i]} />;
-  }
-  calculateOver(hand) {
-    var total = 0;
-    var formattedHand = [];
-    for (var i = 0; i < hand.length; i++) {
-      if (
-        hand[i].value === "JACK" ||
-        hand[i].value === "QUEEN" ||
-        hand[i].value === "KING"
-      ) {
-        formattedHand[i] = 10;
-      } else if (hand[i].value === "ACE") {
-        formattedHand[i] = 1;
-      } else {
-        formattedHand[i] = Number(hand[i].value);
-      }
-    }
-    for (let i = 0; i < formattedHand.length; i++) {
-      total += formattedHand[i];
-    }
-    console.log("total returned by cacl over" + total);
-    return total;
+    return <Card key={Uuid4()} value={this.props.hand[i]} />;
   }
   render() {
-    this.calculateOver(this.state.hand);
+    /*let status = "";
+    if (this.calculateOver(this.props.hand)) {
+      status = "You lose";
+    } else {
+      status = "Count is under 21";
+    }*/
     return (
       <div>
-        <div>{this.state.isOver}</div>
-        <button className="hitmeBtn" onClick={this.handleAddCard.bind(this)}>
-          Hit Me
-        </button>
-        {this.state.hand.map((card, index) => (
+        <div>{status}</div>
+        {this.props.hand.map((card, index) => (
           <div key={Uuid4()} className="card">
             {this.renderCard(index)}
           </div>
@@ -108,6 +69,23 @@ class Game extends React.Component {
         }
       );
   }
+  handleAddCard() {
+    const updatedDealNum = this.state.dealNumber + 1;
+    const updatedHand = this.state.thisDeal.slice(0, this.state.dealNumber + 1);
+    this.setState({
+      dealNumber: updatedDealNum,
+      hand: updatedHand
+    });
+    if (calculateOver(updatedHand) > 21) {
+      this.setState({
+        isOver: true
+      });
+    } else {
+      this.setState({
+        isOver: false
+      });
+    }
+  }
   gameReset() {
     this.setState({
       error: null,
@@ -120,6 +98,12 @@ class Game extends React.Component {
     render(<Game key={Uuid4()} />, document.getElementById("game"));
   }
   render() {
+    let status = "";
+    if (this.state.isOver) {
+      status = "You lose";
+    } else {
+      status = "Count under 21";
+    }
     if (this.state.error) {
       return <div>Error: {this.state.error.message}</div>;
     } else if (!this.state.isLoaded) {
@@ -127,6 +111,10 @@ class Game extends React.Component {
     } else {
       return (
         <div className="game">
+          <div>{status}</div>
+          <button className="hitmeBtn" onClick={this.handleAddCard.bind(this)}>
+            Hit Me
+          </button>
           <Hand
             key={Uuid4()}
             thisDeal={this.state.thisDeal}
@@ -153,3 +141,28 @@ const Header = () => (
 
 render(<Header />, document.getElementById("header"));
 render(<Game key={Uuid4()} />, document.getElementById("game"));
+
+function calculateOver(hand) {
+  console.log(hand);
+  var total = 0;
+  var formattedHand = [];
+  for (var i = 0; i < hand.length; i++) {
+    if (
+      hand[i].value === "JACK" ||
+      hand[i].value === "QUEEN" ||
+      hand[i].value === "KING"
+    ) {
+      formattedHand[i] = 10;
+    } else if (hand[i].value === "ACE") {
+      formattedHand[i] = 1;
+    } else {
+      formattedHand[i] = Number(hand[i].value);
+    }
+  }
+  console.log(formattedHand);
+  for (let i = 0; i < formattedHand.length; i++) {
+    total += formattedHand[i];
+  }
+  console.log("total returned by cacl over" + total);
+  return total;
+}
