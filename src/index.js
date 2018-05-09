@@ -17,13 +17,38 @@ class Hand extends React.Component {
       isOver: this.props.isOver
     };
   }
+  handleAddCard() {
+    // updating state here should update hand
+    const incNum = this.state.dealNumber + 1;
+    this.setState({
+      dealNumber: incNum,
+      thisCard: this.state.thisDeal[incNum],
+      hand: this.state.thisDeal.slice(0, this.state.dealNumber),
+      isOver: this.state.isOver
+    });
+    var total = calculateOver(this.state.hand);
+    if (total > 21) {
+      this.setState((prevState, props) => ({
+        isOver: true
+      }));
+    }
+  }
   renderCard(i) {
     return <Card key={Uuid4()} value={this.state.hand[i]} />;
   }
   render() {
-    return this.state.hand.map((card, index) => (
-      <div className="card">{this.renderCard(index)}</div>
-    ));
+    return (
+      <div>
+        <button className="hitmeBtn" onClick={this.handleAddCard.bind(this)}>
+          Hit Me
+        </button>
+        {this.state.hand.map((card, index) => (
+          <div key={index} className="card">
+            {this.renderCard(index)}
+          </div>
+        ))}
+      </div>
+    );
   }
 }
 class Game extends React.Component {
@@ -65,22 +90,6 @@ class Game extends React.Component {
         }
       );
   }
-  handleAddCard() {
-    // updating state here should update hand
-    const incNum = this.state.dealNumber + 1;
-    this.setState({
-      dealNumber: incNum,
-      thisCard: this.state.thisDeal[incNum],
-      hand: this.state.thisDeal.slice(0, this.state.dealNumber),
-      isOver: this.state.isOver
-    });
-    var total = calculateOver(this.state.hand);
-    if (total > 21) {
-      this.setState((prevState, props) => ({
-        isOver: true
-      }));
-    }
-  }
   gameReset() {
     this.setState({
       error: null,
@@ -109,14 +118,6 @@ class Game extends React.Component {
       return (
         <div className="game">
           <div>{status}</div>
-          <div>
-            <button
-              className="hitmeBtn"
-              onClick={this.handleAddCard.bind(this)}
-            >
-              Hit Me
-            </button>
-          </div>
           <Hand
             key={Uuid4()}
             thisDeal={this.state.thisDeal}
