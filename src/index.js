@@ -99,10 +99,13 @@ class Game extends React.Component {
   }
   render() {
     let status = "";
+    let isEnabled = true;
     if (this.state.isOver) {
       status = "You lose";
+      isEnabled = false;
     } else {
       status = "Count under 21";
+      isEnabled = true;
     }
     if (this.state.error) {
       return <div>Error: {this.state.error.message}</div>;
@@ -112,7 +115,11 @@ class Game extends React.Component {
       return (
         <div className="game">
           <div>{status}</div>
-          <button className="hitmeBtn" onClick={this.handleAddCard.bind(this)}>
+          <button
+            disabled={!isEnabled}
+            className="hitmeBtn"
+            onClick={this.handleAddCard.bind(this)}
+          >
             Hit Me
           </button>
           <Hand
