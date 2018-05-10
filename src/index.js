@@ -70,8 +70,9 @@ class Game extends React.Component {
       );
   }
   handleAddCard() {
-    const updatedDealNum = this.state.dealNumber + 1;
-    const updatedHand = this.state.thisDeal.slice(0, this.state.dealNumber + 1);
+    const curDealNumber = this.state.dealNumber;
+    const updatedDealNum = curDealNumber + 1;
+    const updatedHand = this.state.thisDeal.slice(0, curDealNumber + 1);
     this.setState({
       dealNumber: updatedDealNum,
       hand: updatedHand
