@@ -22,9 +22,7 @@ class Hand extends React.Component {
       <div>
         <div>{status}</div>
         {this.props.hand.map((card, index) => (
-          <div key={Uuid4()} className="card">
-            {this.renderCard(index)}
-          </div>
+          <div className="card">{this.renderCard(index)}</div>
         ))}
       </div>
     );
