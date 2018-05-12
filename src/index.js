@@ -3,9 +3,10 @@ import { render } from "react-dom";
 import Hello from "./Hello";
 import "./index.css";
 import Uuid4 from "uuid4";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function Card(props) {
-  return <img src={props.value.image} alt={props.value.value} width="40" />;
+  return <img src={props.value.image} alt={props.value.value} width="100" />;
 }
 class Hand extends React.Component {
   renderCard(i) {
@@ -19,10 +20,9 @@ class Hand extends React.Component {
       status = "Count is under 21";
     }*/
     return (
-      <div>
-        <div>{status}</div>
+      <div className="row">
         {this.props.hand.map((card, index) => (
-          <div className="card">{this.renderCard(index)}</div>
+          <div className="theCard">{this.renderCard(index)}</div>
         ))}
       </div>
     );
@@ -112,26 +112,32 @@ class Game extends React.Component {
       return <div>Loading...</div>;
     } else {
       return (
-        <div className="game">
-          <div>{status}</div>
-          <button
-            disabled={!isEnabled}
-            className="hitmeBtn"
-            onClick={this.handleAddCard.bind(this)}
-          >
-            Hit Me
-          </button>
-          <Hand
-            key={Uuid4()}
-            thisDeal={this.state.thisDeal}
-            dealNumber={this.state.dealNumber}
-            hand={this.state.thisDeal.slice(0, this.state.dealNumber)}
-            isOver={this.state.isOver}
-          />
-          <div>
-            <button className="resetBtn" onClick={this.gameReset.bind(this)}>
-              Restart Game
-            </button>
+        <div className="col-sm-12">
+          <div className="row">
+            <div className="col-sm-12">{status}</div>
+          </div>
+          <div className="row">
+            <div className="col-sm-6">
+              <button
+                disabled={!isEnabled}
+                className="hitmeBtn cols-sm-12"
+                onClick={this.handleAddCard.bind(this)}
+              >
+                Hit Me
+              </button>
+              <Hand
+                key={Uuid4()}
+                thisDeal={this.state.thisDeal}
+                dealNumber={this.state.dealNumber}
+                hand={this.state.thisDeal.slice(0, this.state.dealNumber)}
+                isOver={this.state.isOver}
+              />
+            </div>
+          </div>
+          <div className="row align-content-center">
+            <div className="col-md-12">
+              <button onClick={this.gameReset.bind(this)}>Restart Game</button>
+            </div>
           </div>
         </div>
       );
@@ -140,7 +146,7 @@ class Game extends React.Component {
 }
 
 const Header = () => (
-  <div>
+  <div class="row">
     <Hello name="Player" />
   </div>
 );
