@@ -6,24 +6,56 @@ import Uuid4 from "uuid4";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Card(props) {
-  return <img src={props.value.image} alt={props.value.value} width="100" />;
+  let cardValue = /^[a-zA-Z]+$/.test(props.value.value)
+    ? props.value.value.charAt()
+    : props.value.value;
+  return (
+    <div className="cardInner">
+      <div data-id={props.value.code}>
+        {cardValue}
+        {props.suitIcon}
+      </div>
+    </div>
+  );
 }
 class Hand extends React.Component {
-  renderCard(i) {
-    return <Card key={Uuid4()} value={this.props.hand[i]} />;
+  renderCard(i, suitIcon) {
+    return (
+      <Card
+        key={Uuid4()}
+        value={this.props.hand[i]}
+        index={i}
+        suitIcon={suitIcon}
+      />
+    );
   }
   render() {
-    /*let status = "";
-    if (this.calculateOver(this.props.hand)) {
-      status = "You lose";
-    } else {
-      status = "Count is under 21";
-    }*/
     return (
-      <div className="row">
-        {this.props.hand.map((card, index) => (
-          <div className="theCard">{this.renderCard(index)}</div>
-        ))}
+      <div className="row playerHand hand">
+        {this.props.hand.map((card, index) => {
+          let rotStyle = {
+            transform: "rotate(" + index * 15 + "deg)",
+            left: index > 0 ? index * -100 + index * 15 : 0,
+            bottom: index * -15,
+            color:
+              card.suit === "CLUBS" || card.suit === "SPADES" ? "black" : "red"
+          };
+          let suitIcon = "";
+          if (card.suit === "CLUBS") {
+            suitIcon = "\u2663";
+          } else if (card.suit === "SPADES") {
+            suitIcon = "\u2660";
+          } else if (card.suit === "HEARTS") {
+            suitIcon = "\u2665";
+          } else if (card.suit === "DIAMONDS") {
+            suitIcon = "\u2666";
+          }
+          return (
+            <div className="card" style={rotStyle}>
+              {this.renderCard(index, suitIcon)}
+            </div>
+          );
+        })}
       </div>
     );
   }
@@ -112,26 +144,28 @@ class Game extends React.Component {
       return <div>Loading...</div>;
     } else {
       return (
-        <div className="col-sm-12">
-          <div className="row">
-            <div className="col-sm-12">{status}</div>
-          </div>
-          <div className="row">
-            <div className="col-sm-6">
-              <button
-                disabled={!isEnabled}
-                className="hitmeBtn cols-sm-12"
-                onClick={this.handleAddCard.bind(this)}
-              >
-                Hit Me
-              </button>
-              <Hand
-                key={Uuid4()}
-                thisDeal={this.state.thisDeal}
-                dealNumber={this.state.dealNumber}
-                hand={this.state.thisDeal.slice(0, this.state.dealNumber)}
-                isOver={this.state.isOver}
-              />
+        <div className="row justify-content-center">
+          <div className="col-sm-12">
+            <div className="row">
+              <div className="col-sm-12">{status}</div>
+            </div>
+            <div className="row">
+              <div className="col-sm-6">
+                <button
+                  disabled={!isEnabled}
+                  className="hitmeBtn cols-sm-12"
+                  onClick={this.handleAddCard.bind(this)}
+                >
+                  Hit Me
+                </button>
+                <Hand
+                  key={Uuid4()}
+                  thisDeal={this.state.thisDeal}
+                  dealNumber={this.state.dealNumber}
+                  hand={this.state.thisDeal.slice(0, this.state.dealNumber)}
+                  isOver={this.state.isOver}
+                />
+              </div>
             </div>
           </div>
           <div className="row align-content-center">
@@ -146,7 +180,7 @@ class Game extends React.Component {
 }
 
 const Header = () => (
-  <div class="row">
+  <div className="row">
     <Hello name="Player" />
   </div>
 );

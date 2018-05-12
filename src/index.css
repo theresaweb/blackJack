@@ -1,1 +1,8 @@
-
+.card {
+  width: 100px;
+  height: 150px;
+}
+.fa-heart {
+  font-size: 40px;
+  color: purple;
+}
