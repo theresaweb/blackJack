@@ -37,9 +37,9 @@ class Hand extends React.Component {
       <div className="row hand">
         {this.props.hand.map((card, index) => {
           let rotStyle = {
-            transform: "rotate(" + index * 15 + "deg)",
-            left: index > 0 ? index * -100 + index * 15 : 0,
-            bottom: index * -15,
+            transform: "rotate(" + index * 10 + "deg)",
+            left: index > 0 ? index * -100 + index * 5 : 0,
+            bottom: index * -5,
             color:
               card.suit === "CLUBS" || card.suit === "SPADES" ? "black" : "red"
           };
