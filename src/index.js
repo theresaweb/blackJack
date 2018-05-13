@@ -5,18 +5,21 @@ import "./index.css";
 import Uuid4 from "uuid4";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-function Card(props) {
-  let cardValue = /^[a-zA-Z]+$/.test(props.value.value)
-    ? props.value.value.charAt()
-    : props.value.value;
-  return (
-    <div className="cardInner">
-      <div data-id={props.value.code}>
-        {cardValue}
-        {props.suitIcon}
+class Card extends React.Component {
+  render() {
+    let cardValue = /^[a-zA-Z]+$/.test(this.props.value.value)
+      ? this.props.value.value.charAt()
+      : this.props.value.value;
+    let faceUp = this.isClicked ? "" : "gradient-pattern";
+    return (
+      <div className="gradient-pattern">
+        <div data-id={this.props.value.code}>
+          {cardValue}
+          {this.props.suitIcon}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
 class Hand extends React.Component {
   renderCard(i, suitIcon) {
@@ -31,7 +34,7 @@ class Hand extends React.Component {
   }
   render() {
     return (
-      <div className="row playerHand hand">
+      <div className="row hand">
         {this.props.hand.map((card, index) => {
           let rotStyle = {
             transform: "rotate(" + index * 15 + "deg)",
@@ -66,10 +69,13 @@ class Game extends React.Component {
     this.state = {
       error: null,
       isLoaded: false,
-      dealNumber: 2,
+      dealNumber: 1,
       thisDeal: [],
       hand: [],
-      isOver: false
+      isOver: false,
+      playerTurn: true,
+      playerDealNumber: 0,
+      dealerDealNumber: 1
     };
   }
   componentDidMount() {
@@ -105,7 +111,8 @@ class Game extends React.Component {
     const updatedHand = this.state.thisDeal.slice(0, curDealNumber + 1);
     this.setState({
       dealNumber: updatedDealNum,
-      hand: updatedHand
+      hand: updatedHand,
+      playerTurn: !this.state.playerTurn
     });
     if (calculateOver(updatedHand) > 21) {
       this.setState({
@@ -121,10 +128,11 @@ class Game extends React.Component {
     this.setState({
       error: null,
       isLoaded: false,
-      dealNumber: 2,
+      dealNumber: 1,
       thisDeal: [],
       hand: [],
-      isOver: false
+      isOver: false,
+      playerTurn: true
     });
     render(<Game key={Uuid4()} />, document.getElementById("game"));
   }
@@ -139,12 +147,29 @@ class Game extends React.Component {
       isEnabled = true;
     }
     if (this.state.error) {
-      return <div>Error: {this.state.error.message}</div>;
+      return (
+        <div className="row align-content-center">
+          <div className="col-md-12">
+            <div>Error: {this.state.error.message}</div>;
+          </div>
+        </div>
+      );
     } else if (!this.state.isLoaded) {
-      return <div>Loading...</div>;
+      return (
+        <div className="row align-content-center">
+          <div className="col-md-12">
+            <div>Loading...</div>;
+          </div>
+        </div>
+      );
     } else {
       return (
         <div className="row justify-content-center">
+          <div className="row align-content-center">
+            <div className="col-md-12">
+              <button onClick={this.gameReset.bind(this)}>Restart Game</button>
+            </div>
+          </div>
           <div className="col-sm-12">
             <div className="row">
               <div className="col-sm-12">{status}</div>
@@ -159,6 +184,7 @@ class Game extends React.Component {
                   Hit Me
                 </button>
                 <Hand
+                  player={this.state.playerTurn}
                   key={Uuid4()}
                   thisDeal={this.state.thisDeal}
                   dealNumber={this.state.dealNumber}
@@ -166,11 +192,23 @@ class Game extends React.Component {
                   isOver={this.state.isOver}
                 />
               </div>
-            </div>
-          </div>
-          <div className="row align-content-center">
-            <div className="col-md-12">
-              <button onClick={this.gameReset.bind(this)}>Restart Game</button>
+              <div className="col-sm-6">
+                <button
+                  disabled={!isEnabled}
+                  className="hitmeBtn cols-sm-12"
+                  onClick={this.handleAddCard.bind(this)}
+                >
+                  Dealer play card
+                </button>
+                <Hand
+                  playerTurn={this.state.playerTurn}
+                  key={Uuid4()}
+                  thisDeal={this.state.thisDeal}
+                  dealNumber={this.state.dealNumber}
+                  hand={this.state.thisDeal.slice(0, this.state.dealNumber)}
+                  isOver={this.state.isOver}
+                />
+              </div>
             </div>
           </div>
         </div>

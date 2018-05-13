@@ -2,7 +2,19 @@
   width: 100px;
   height: 150px;
 }
-.fa-heart {
-  font-size: 40px;
-  color: purple;
+.gradient-patternz {
+  box-sizing: content-box;
+  font: normal 100%/normal Arial, Helvetica, sans-serif;
+  width: 100px;
+  height: 150px;
+  color: rgb(255, 255, 255);
+  -o-text-overflow: clip;
+  text-overflow: clip;
+  background: radial-gradient(rgb(255, 255, 255) 15%, rgba(0, 0, 0, 0) 16%),
+    radial-gradient(rgb(255, 255, 255) 15%, rgba(0, 0, 0, 0) 16%),
+    rgb(147, 148, 148);
+  background-position: 0 0, 30px 30px;
+  background-origin: padding-box;
+  background-clip: border-box;
+  background-size: 60px 60px;
 }
