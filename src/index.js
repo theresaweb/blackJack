@@ -8,13 +8,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 class Card extends React.Component {
   constructor(props) {
     super(props);
-    this.toggleFaceUp = this.toggleFaceUp.bind(this);
     this.state = {
       faceUp: false
     };
   }
   toggleFaceUp() {
-    const currentState = this.state.faceUp;
+    const currentState = this.props.faceUp;
     this.setState({ faceUp: !currentState });
   }
   render() {
@@ -40,8 +39,15 @@ class Card extends React.Component {
 class Hand extends React.Component {
   renderCard(i, suitIcon, hand) {
     let thisCard = hand[i];
+    let faceUp = false;
     return (
-      <Card key={Uuid4()} value={thisCard} index={i} suitIcon={suitIcon} />
+      <Card
+        key={Uuid4()}
+        value={thisCard}
+        index={i}
+        suitIcon={suitIcon}
+        faceUp={faceUp}
+      />
     );
   }
   render() {
