@@ -22,80 +22,120 @@ class Card extends React.Component {
   }
 }
 class Hand extends React.Component {
-  renderCard(i, suitIcon) {
+  renderCard(i, suitIcon, hand) {
+    let thisCard = hand[i];
     return (
-      <Card
-        key={Uuid4()}
-        value={this.props.hand[i]}
-        index={i}
-        suitIcon={suitIcon}
-      />
+      <Card key={Uuid4()} value={thisCard} index={i} suitIcon={suitIcon} />
     );
   }
   render() {
-    return (
-      <div className="row hand">
-        {this.props.hand.map((card, index) => {
-          let rotStyle = {
-            transform: "rotate(" + index * 10 + "deg)",
-            left: index > 0 ? index * -100 + index * 5 : 0,
-            bottom: index * -5,
-            color:
-              card.suit === "CLUBS" || card.suit === "SPADES" ? "black" : "red"
-          };
-          let suitIcon = "";
-          if (card.suit === "CLUBS") {
-            suitIcon = "\u2663";
-          } else if (card.suit === "SPADES") {
-            suitIcon = "\u2660";
-          } else if (card.suit === "HEARTS") {
-            suitIcon = "\u2665";
-          } else if (card.suit === "DIAMONDS") {
-            suitIcon = "\u2666";
-          }
-          return (
-            <div className="card" style={rotStyle}>
-              {this.renderCard(index, suitIcon)}
-            </div>
-          );
-        })}
-      </div>
-    );
+    if (this.props.isPlayer) {
+      return (
+        <div className="row hand">
+          {this.props.playerHand.map((card, index) => {
+            let rotStyle = {
+              transform: "rotate(" + index * 10 + "deg)",
+              left: index > 0 ? index * -100 + index * 10 : 0,
+              bottom: index * -5,
+              color:
+                card.suit === "CLUBS" || card.suit === "SPADES"
+                  ? "black"
+                  : "red"
+            };
+            let suitIcon = "";
+            if (card.suit === "CLUBS") {
+              suitIcon = "\u2663";
+            } else if (card.suit === "SPADES") {
+              suitIcon = "\u2660";
+            } else if (card.suit === "HEARTS") {
+              suitIcon = "\u2665";
+            } else if (card.suit === "DIAMONDS") {
+              suitIcon = "\u2666";
+            }
+            return (
+              <div className="card" style={rotStyle}>
+                {this.renderCard(index, suitIcon, this.props.playerHand)}
+              </div>
+            );
+          })}
+        </div>
+      );
+    } else {
+      return (
+        <div className="row hand">
+          {this.props.dealerHand.map((card, index) => {
+            let rotStyle = {
+              transform: "rotate(" + index * 10 + "deg)",
+              left: index > 0 ? index * -100 + index * 10 : 0,
+              bottom: index * -5,
+              color:
+                card.suit === "CLUBS" || card.suit === "SPADES"
+                  ? "black"
+                  : "red"
+            };
+            let suitIcon = "";
+            if (card.suit === "CLUBS") {
+              suitIcon = "\u2663";
+            } else if (card.suit === "SPADES") {
+              suitIcon = "\u2660";
+            } else if (card.suit === "HEARTS") {
+              suitIcon = "\u2665";
+            } else if (card.suit === "DIAMONDS") {
+              suitIcon = "\u2666";
+            }
+            return (
+              <div className="card" style={rotStyle}>
+                {this.renderCard(index, suitIcon, this.props.dealerHand)}
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
   }
 }
 class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      deckId: "",
       error: null,
       isLoaded: false,
       dealNumber: 1,
-      thisDeal: [],
-      hand: [],
-      isOver: false,
-      playerTurn: true,
-      playerDealNumber: 0,
-      dealerDealNumber: 1
+      dealerIsOver: false,
+      playerIsOver: false,
+      dealerHand: [],
+      playerHand: [],
+      playerType: ""
     };
   }
   componentDidMount() {
     // fetch a shuffled deck
     fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
       .then(res => res.json())
-      .then(shuffledCards =>
-        fetch(
-          "https://deckofcardsapi.com/api/deck/" +
-            shuffledCards.deck_id +
-            "/draw/?count=52"
-        )
-      )
-      .then(res => res.json())
       .then(
-        deckResult => {
+        shuffledCards => {
+          let deckId = shuffledCards.deck_id;
           this.setState({
-            isLoaded: true,
-            thisDeal: deckResult.cards
+            deckId: deckId
           });
+          fetch(
+            "https://deckofcardsapi.com/api/deck/" + deckId + "/draw/?count=2"
+          )
+            .then(res => res.json())
+            .then(deckResult => {
+              let initialPlayerHand = this.state.playerHand.concat(
+                deckResult.cards[0]
+              );
+              let initialDealerHand = this.state.playerHand.concat(
+                deckResult.cards[1]
+              );
+              this.setState({
+                isLoaded: true,
+                playerHand: initialPlayerHand,
+                dealerHand: initialDealerHand
+              });
+            });
         },
         error => {
           this.setState({
@@ -105,45 +145,113 @@ class Game extends React.Component {
         }
       );
   }
-  handleAddCard() {
-    const curDealNumber = this.state.dealNumber;
-    const updatedDealNum = curDealNumber + 1;
-    const updatedHand = this.state.thisDeal.slice(0, curDealNumber + 1);
-    this.setState({
-      dealNumber: updatedDealNum,
-      hand: updatedHand,
-      playerTurn: !this.state.playerTurn
-    });
-    if (calculateOver(updatedHand) > 21) {
-      this.setState({
-        isOver: true
-      });
-    } else {
-      this.setState({
-        isOver: false
-      });
-    }
+  handleAddCardPlayer() {
+    let curPlayerHand = this.state.playerHand.slice();
+    fetch(
+      "https://deckofcardsapi.com/api/deck/" +
+        this.state.deckId +
+        "/draw/?count=1"
+    )
+      .then(res => res.json())
+      .then(
+        dealResult => {
+          let newPlayerHand = curPlayerHand.concat(dealResult.cards);
+          this.setState({
+            isLoaded: true,
+            playerHand: newPlayerHand
+          });
+          const curDealNumber = this.state.dealNumber;
+          const updatedDealNum = curDealNumber + 1;
+          this.setState({
+            dealNumber: updatedDealNum,
+            playerType: "player"
+          });
+          if (calculateOver(this.state.playerHand) > 21) {
+            this.setState({
+              playerIsOver: true
+            });
+          } else {
+            this.setState({
+              playerIsOver: false
+            });
+          }
+        },
+        error => {
+          this.setState({
+            isLoaded: true,
+            error: error
+          });
+        }
+      );
+  }
+  handleAddCardDealer() {
+    let curDealerHand = this.state.dealerHand.slice();
+    fetch(
+      "https://deckofcardsapi.com/api/deck/" +
+        this.state.deckId +
+        "/draw/?count=1"
+    )
+      .then(res => res.json())
+      .then(
+        dealResult => {
+          let newDealerHand = curDealerHand.concat(dealResult.cards);
+          this.setState({
+            isLoaded: true,
+            dealerHand: newDealerHand
+          });
+          const curDealNumber = this.state.dealNumber;
+          const updatedDealNum = curDealNumber + 1;
+          this.setState({
+            dealNumber: updatedDealNum,
+            playerType: "dealer"
+          });
+          if (calculateOver(this.state.dealerHand) > 21) {
+            this.setState({
+              dealerIsOver: true
+            });
+          } else {
+            this.setState({
+              dealerIsOver: false
+            });
+          }
+        },
+        error => {
+          this.setState({
+            isLoaded: true,
+            error: error
+          });
+        }
+      );
   }
   gameReset() {
     this.setState({
       error: null,
       isLoaded: false,
       dealNumber: 1,
-      thisDeal: [],
-      hand: [],
-      isOver: false,
-      playerTurn: true
+      dealerIsOver: false,
+      playerIsOver: false,
+      dealerHand: [],
+      playerHand: [],
+      playerType: ""
     });
     render(<Game key={Uuid4()} />, document.getElementById("game"));
   }
   render() {
-    let status = "";
+    let playerStatus = "";
     let isEnabled = true;
-    if (this.state.isOver) {
-      status = "You lose";
+    if (this.state.playerIsOver) {
+      playerStatus = "You lose";
       isEnabled = false;
     } else {
-      status = "Count under 21";
+      playerStatus = "Count under 21";
+      isEnabled = true;
+    }
+    let dealerStatus = "";
+    if (this.state.dealerIsOver) {
+      dealerStatus = "You lose";
+      isEnabled = false;
+    } else {
+      dealerStatus = "Count under 21";
       isEnabled = true;
     }
     if (this.state.error) {
@@ -158,55 +266,56 @@ class Game extends React.Component {
       return (
         <div className="row align-content-center">
           <div className="col-md-12">
-            <div>Loading...</div>;
+            <div>Loading...</div>
           </div>
         </div>
       );
     } else {
+      debugger;
       return (
         <div className="row justify-content-center">
           <div className="row align-content-center">
             <div className="col-md-12">
-              <button onClick={this.gameReset.bind(this)}>Restart Game</button>
+              <button onClick={this.gameReset.bind(this)}>Start/Deal</button>
             </div>
           </div>
           <div className="col-sm-12">
             <div className="row">
-              <div className="col-sm-12">{status}</div>
-            </div>
-            <div className="row">
               <div className="col-sm-6">
+                <div className="row">
+                  <div className="col-sm-12">{playerStatus}</div>
+                </div>
                 <button
                   disabled={!isEnabled}
                   className="hitmeBtn cols-sm-12"
-                  onClick={this.handleAddCard.bind(this)}
+                  onClick={this.handleAddCardPlayer.bind(this)}
                 >
                   Hit Me
                 </button>
                 <Hand
-                  player={this.state.playerTurn}
                   key={Uuid4()}
-                  thisDeal={this.state.thisDeal}
                   dealNumber={this.state.dealNumber}
-                  hand={this.state.thisDeal.slice(0, this.state.dealNumber)}
-                  isOver={this.state.isOver}
+                  dealerHand={this.state.dealerHand}
+                  playerHand={this.state.playerHand}
+                  playerIsOver={this.state.playerIsOver}
+                  isPlayer={true}
                 />
               </div>
               <div className="col-sm-6">
                 <button
                   disabled={!isEnabled}
                   className="hitmeBtn cols-sm-12"
-                  onClick={this.handleAddCard.bind(this)}
+                  onClick={this.handleAddCardDealer.bind(this)}
                 >
-                  Dealer play card
+                  Hit Me
                 </button>
                 <Hand
-                  playerTurn={this.state.playerTurn}
                   key={Uuid4()}
-                  thisDeal={this.state.thisDeal}
                   dealNumber={this.state.dealNumber}
-                  hand={this.state.thisDeal.slice(0, this.state.dealNumber)}
-                  isOver={this.state.isOver}
+                  dealerHand={this.state.dealerHand}
+                  playerHand={this.state.playerHand}
+                  dealerIsOver={this.state.dealerIsOver}
+                  isPlayer={false}
                 />
               </div>
             </div>
@@ -227,7 +336,6 @@ render(<Header />, document.getElementById("header"));
 render(<Game key={Uuid4()} />, document.getElementById("game"));
 
 function calculateOver(hand) {
-  console.log(hand);
   var total = 0;
   var formattedHand = [];
   for (var i = 0; i < hand.length; i++) {
@@ -243,10 +351,8 @@ function calculateOver(hand) {
       formattedHand[i] = Number(hand[i].value);
     }
   }
-  console.log(formattedHand);
   for (let i = 0; i < formattedHand.length; i++) {
     total += formattedHand[i];
   }
-  console.log("total returned by cacl over" + total);
   return total;
 }
