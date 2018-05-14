@@ -2,7 +2,7 @@
   width: 100px;
   height: 150px;
 }
-.gradient-patternz {
+.gradient-pattern {
   box-sizing: content-box;
   font: normal 100%/normal Arial, Helvetica, sans-serif;
   width: 100px;
@@ -17,4 +17,7 @@
   background-origin: padding-box;
   background-clip: border-box;
   background-size: 60px 60px;
+}
+.gradient-pattern .cardInner {
+  display: none;
 }

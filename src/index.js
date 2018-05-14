@@ -6,20 +6,36 @@ import Uuid4 from "uuid4";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 class Card extends React.Component {
+  constructor(props) {
+    super(props);
+    this.toggleFaceUp = this.toggleFaceUp.bind(this);
+    this.state = {
+      faceUp: false
+    };
+  }
+  toggleFaceUp() {
+    const currentState = this.state.faceUp;
+    this.setState({ faceUp: !currentState });
+  }
   render() {
     let cardValue = /^[a-zA-Z]+$/.test(this.props.value.value)
       ? this.props.value.value.charAt()
       : this.props.value.value;
-    let faceUp = this.isClicked ? "" : "gradient-pattern";
     return (
-      <div className="gradient-pattern">
+      <div
+        className={this.state.faceUp ? null : "gradient-pattern"}
+        onClick={this.toggleFaceUp.bind(this)}
+      >
         <div data-id={this.props.value.code}>
-          {cardValue}
-          {this.props.suitIcon}
+          <div className="cardInner">
+            {cardValue}
+            {this.props.suitIcon}
+          </div>
         </div>
       </div>
     );
   }
+  handleCardClick() {}
 }
 class Hand extends React.Component {
   renderCard(i, suitIcon, hand) {
@@ -106,7 +122,8 @@ class Game extends React.Component {
       playerIsOver: false,
       dealerHand: [],
       playerHand: [],
-      playerType: ""
+      playerTotal: 0,
+      dealerTotal: 0
     };
   }
   componentDidMount() {
@@ -130,10 +147,14 @@ class Game extends React.Component {
               let initialDealerHand = this.state.playerHand.concat(
                 deckResult.cards[1]
               );
+              let playerTotal = calculateOver(initialPlayerHand);
+              let dealerTotal = calculateOver(initialDealerHand);
               this.setState({
                 isLoaded: true,
                 playerHand: initialPlayerHand,
-                dealerHand: initialDealerHand
+                dealerHand: initialDealerHand,
+                playerTotal: playerTotal,
+                dealerTotal: dealerTotal
               });
             });
         },
@@ -163,16 +184,18 @@ class Game extends React.Component {
           const curDealNumber = this.state.dealNumber;
           const updatedDealNum = curDealNumber + 1;
           this.setState({
-            dealNumber: updatedDealNum,
-            playerType: "player"
+            dealNumber: updatedDealNum
           });
-          if (calculateOver(this.state.playerHand) > 21) {
+          let playerTotal = calculateOver(this.state.playerHand);
+          if (playerTotal > 21) {
             this.setState({
-              playerIsOver: true
+              playerIsOver: true,
+              playerTotal: playerTotal
             });
           } else {
             this.setState({
-              playerIsOver: false
+              playerIsOver: false,
+              playerTotal: playerTotal
             });
           }
         },
@@ -205,13 +228,16 @@ class Game extends React.Component {
             dealNumber: updatedDealNum,
             playerType: "dealer"
           });
-          if (calculateOver(this.state.dealerHand) > 21) {
+          let dealerTotal = calculateOver(this.state.dealerHand);
+          if (dealerTotal > 21) {
             this.setState({
-              dealerIsOver: true
+              dealerIsOver: true,
+              dealerTotal: dealerTotal
             });
           } else {
             this.setState({
-              dealerIsOver: false
+              dealerIsOver: false,
+              dealerTotal: dealerTotal
             });
           }
         },
@@ -225,6 +251,7 @@ class Game extends React.Component {
   }
   gameReset() {
     this.setState({
+      deckId: "",
       error: null,
       isLoaded: false,
       dealNumber: 1,
@@ -232,26 +259,29 @@ class Game extends React.Component {
       playerIsOver: false,
       dealerHand: [],
       playerHand: [],
-      playerType: ""
+      playerTotal: 0,
+      dealerTotal: 0
     });
     render(<Game key={Uuid4()} />, document.getElementById("game"));
   }
   render() {
     let playerStatus = "";
     let isEnabled = true;
+    let thisPlayerTotal = this.state.playerTotal;
     if (this.state.playerIsOver) {
-      playerStatus = "You lose";
+      playerStatus = "Player loses - total: " + thisPlayerTotal;
       isEnabled = false;
     } else {
-      playerStatus = "Count under 21";
+      playerStatus = "Player has " + thisPlayerTotal;
       isEnabled = true;
     }
     let dealerStatus = "";
+    let thisDealerTotal = this.state.dealerTotal;
     if (this.state.dealerIsOver) {
-      dealerStatus = "You lose";
+      dealerStatus = "Dealer loses - total: " + thisDealerTotal;
       isEnabled = false;
     } else {
-      dealerStatus = "Count under 21";
+      dealerStatus = "Dealer has " + thisDealerTotal;
       isEnabled = true;
     }
     if (this.state.error) {
@@ -271,7 +301,6 @@ class Game extends React.Component {
         </div>
       );
     } else {
-      debugger;
       return (
         <div className="row justify-content-center">
           <div className="row align-content-center">
@@ -302,6 +331,9 @@ class Game extends React.Component {
                 />
               </div>
               <div className="col-sm-6">
+                <div className="row">
+                  <div className="col-sm-12">{dealerStatus}</div>
+                </div>
                 <button
                   disabled={!isEnabled}
                   className="hitmeBtn cols-sm-12"
