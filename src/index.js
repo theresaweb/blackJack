@@ -42,78 +42,52 @@ class Hand extends React.Component {
     );
   }
   handleClick(i) {
-    console.log(i);
-    const handCopy = this.props.playerHand.slice();
-    console.log(handCopy);
-    handCopy[i]["faceUp"] = true;
+    var thisHand;
+    if (this.props.isPlayer) {
+      thisHand = this.props.playerHand.slice();
+    } else {
+      thisHand = this.props.dealerHand.slice();
+    }
+    thisHand[i]["faceUp"] = true;
     this.setState({
-      playerHand: handCopy
+      playerHand: thisHand
     });
   }
   render() {
+    var thisHand;
     if (this.props.isPlayer) {
-      return (
-        <div key={Uuid4()} className="row hand">
-          {this.props.playerHand.map((card, index) => {
-            let rotStyle = {
-              transform: "rotate(" + index * 10 + "deg)",
-              left: index > 0 ? index * -100 + index * 10 : 0,
-              bottom: index * -5,
-              color:
-                card.suit === "CLUBS" || card.suit === "SPADES"
-                  ? "black"
-                  : "red"
-            };
-            let suitIcon = "";
-            if (card.suit === "CLUBS") {
-              suitIcon = "\u2663";
-            } else if (card.suit === "SPADES") {
-              suitIcon = "\u2660";
-            } else if (card.suit === "HEARTS") {
-              suitIcon = "\u2665";
-            } else if (card.suit === "DIAMONDS") {
-              suitIcon = "\u2666";
-            }
-            return (
-              <div key={Uuid4()} className="card" style={rotStyle}>
-                {this.renderCard(index, suitIcon, this.props.playerHand)}
-              </div>
-            );
-          })}
-        </div>
-      );
+      thisHand = this.props.playerHand.slice();
     } else {
-      return (
-        <div key={Uuid4()} className="row hand">
-          {this.props.dealerHand.map((card, index) => {
-            let rotStyle = {
-              transform: "rotate(" + index * 10 + "deg)",
-              left: index > 0 ? index * -100 + index * 10 : 0,
-              bottom: index * -5,
-              color:
-                card.suit === "CLUBS" || card.suit === "SPADES"
-                  ? "black"
-                  : "red"
-            };
-            let suitIcon = "";
-            if (card.suit === "CLUBS") {
-              suitIcon = "\u2663";
-            } else if (card.suit === "SPADES") {
-              suitIcon = "\u2660";
-            } else if (card.suit === "HEARTS") {
-              suitIcon = "\u2665";
-            } else if (card.suit === "DIAMONDS") {
-              suitIcon = "\u2666";
-            }
-            return (
-              <div key={Uuid4()} className="card" style={rotStyle}>
-                {this.renderCard(index, suitIcon, this.props.dealerHand)}
-              </div>
-            );
-          })}
-        </div>
-      );
+      thisHand = this.props.dealerHand.slice();
     }
+    return (
+      <div key={Uuid4()} className="row hand">
+        {thisHand.map((card, index) => {
+          let rotStyle = {
+            transform: "rotate(" + index * 10 + "deg)",
+            left: index > 0 ? index * -100 + index * 10 : 0,
+            bottom: index * -5,
+            color:
+              card.suit === "CLUBS" || card.suit === "SPADES" ? "black" : "red"
+          };
+          let suitIcon = "";
+          if (card.suit === "CLUBS") {
+            suitIcon = "\u2663";
+          } else if (card.suit === "SPADES") {
+            suitIcon = "\u2660";
+          } else if (card.suit === "HEARTS") {
+            suitIcon = "\u2665";
+          } else if (card.suit === "DIAMONDS") {
+            suitIcon = "\u2666";
+          }
+          return (
+            <div key={Uuid4()} className="card" style={rotStyle}>
+              {this.renderCard(index, suitIcon, thisHand)}
+            </div>
+          );
+        })}
+      </div>
+    );
   }
 }
 class Game extends React.Component {
