@@ -8,13 +8,24 @@ import "bootstrap/dist/css/bootstrap.min.css";
 class Card extends React.Component {
   constructor(props) {
     super(props);
+    this.handleCardClick = this.handleCardClick.bind(this);
     this.state = {
-      faceUp: false
+      faceUp: this.props.faceUp
     };
   }
-  toggleFaceUp() {
-    const currentState = this.props.faceUp;
-    this.setState({ faceUp: !currentState });
+  handleCardClick() {
+    let handCopy = this.props.hand.slice();
+    console.log("handCopy");
+    console.log(handCopy);
+    handCopy[this.props.index] = !this.state.faceUp;
+    console.log("handCopy2");
+    console.log(handCopy);
+    this.setState({
+      playerHand: handCopy
+    });
+    console.log("playerhand state");
+    console.log(this.props.playerHand);
+    console.log(this.state.playerHand);
   }
   render() {
     let cardValue = /^[a-zA-Z]+$/.test(this.props.value.value)
@@ -22,38 +33,34 @@ class Card extends React.Component {
       : this.props.value.value;
     return (
       <div
-        className={this.state.faceUp ? null : "gradient-pattern"}
-        onClick={this.toggleFaceUp.bind(this)}
+        onClick={this.handleCardClick.bind(this)}
+        className={this.props.hand.faceUp ? null : "gradient-pattern"}
       >
-        <div data-id={this.props.value.code}>
-          <div className="cardInner">
-            {cardValue}
-            {this.props.suitIcon}
-          </div>
+        <div className="cardInner">
+          {cardValue}
+          {this.props.suitIcon}
         </div>
       </div>
     );
   }
-  handleCardClick() {}
 }
 class Hand extends React.Component {
   renderCard(i, suitIcon, hand) {
     let thisCard = hand[i];
-    let faceUp = false;
     return (
       <Card
         key={Uuid4()}
         value={thisCard}
         index={i}
         suitIcon={suitIcon}
-        faceUp={faceUp}
+        hand={hand}
       />
     );
   }
   render() {
     if (this.props.isPlayer) {
       return (
-        <div className="row hand">
+        <div key={Uuid4()} className="row hand">
           {this.props.playerHand.map((card, index) => {
             let rotStyle = {
               transform: "rotate(" + index * 10 + "deg)",
@@ -75,7 +82,7 @@ class Hand extends React.Component {
               suitIcon = "\u2666";
             }
             return (
-              <div className="card" style={rotStyle}>
+              <div key={Uuid4()} className="card" style={rotStyle}>
                 {this.renderCard(index, suitIcon, this.props.playerHand)}
               </div>
             );
@@ -84,7 +91,7 @@ class Hand extends React.Component {
       );
     } else {
       return (
-        <div className="row hand">
+        <div key={Uuid4()} className="row hand">
           {this.props.dealerHand.map((card, index) => {
             let rotStyle = {
               transform: "rotate(" + index * 10 + "deg)",
@@ -106,7 +113,7 @@ class Hand extends React.Component {
               suitIcon = "\u2666";
             }
             return (
-              <div className="card" style={rotStyle}>
+              <div key={Uuid4()} className="card" style={rotStyle}>
                 {this.renderCard(index, suitIcon, this.props.dealerHand)}
               </div>
             );
@@ -150,9 +157,11 @@ class Game extends React.Component {
               let initialPlayerHand = this.state.playerHand.concat(
                 deckResult.cards[0]
               );
+              initialPlayerHand[0]["faceUp"] = false;
               let initialDealerHand = this.state.playerHand.concat(
                 deckResult.cards[1]
               );
+              initialDealerHand[0]["faceUp"] = false;
               let playerTotal = calculateOver(initialPlayerHand);
               let dealerTotal = calculateOver(initialDealerHand);
               this.setState({
@@ -182,7 +191,9 @@ class Game extends React.Component {
       .then(res => res.json())
       .then(
         dealResult => {
-          let newPlayerHand = curPlayerHand.concat(dealResult.cards);
+          let thisCard = dealResult.cards[0];
+          thisCard["faceUp"] = false;
+          let newPlayerHand = curPlayerHand.concat(thisCard);
           this.setState({
             isLoaded: true,
             playerHand: newPlayerHand
@@ -223,7 +234,9 @@ class Game extends React.Component {
       .then(res => res.json())
       .then(
         dealResult => {
-          let newDealerHand = curDealerHand.concat(dealResult.cards);
+          let thisCard = dealResult.cards[0];
+          thisCard["faceUp"] = false;
+          let newDealerHand = curDealerHand.concat(thisCard);
           this.setState({
             isLoaded: true,
             dealerHand: newDealerHand
