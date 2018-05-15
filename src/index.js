@@ -6,35 +6,18 @@ import Uuid4 from "uuid4";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 class Card extends React.Component {
-  constructor(props) {
-    super(props);
-    this.handleCardClick = this.handleCardClick.bind(this);
-    this.state = {
-      faceUp: this.props.faceUp
-    };
-  }
-  handleCardClick() {
-    let handCopy = this.props.hand.slice();
-    console.log("handCopy");
-    console.log(handCopy);
-    handCopy[this.props.index] = !this.state.faceUp;
-    console.log("handCopy2");
-    console.log(handCopy);
-    this.setState({
-      playerHand: handCopy
-    });
-    console.log("playerhand state");
-    console.log(this.props.playerHand);
-    console.log(this.state.playerHand);
-  }
   render() {
     let cardValue = /^[a-zA-Z]+$/.test(this.props.value.value)
       ? this.props.value.value.charAt()
       : this.props.value.value;
     return (
       <div
-        onClick={this.handleCardClick.bind(this)}
-        className={this.props.hand.faceUp ? null : "gradient-pattern"}
+        onClick={() => {
+          this.props.faceClick(this.props.index);
+        }}
+        className={
+          this.props.hand[this.props.index].faceUp ? null : "gradient-pattern"
+        }
       >
         <div className="cardInner">
           {cardValue}
@@ -54,8 +37,18 @@ class Hand extends React.Component {
         index={i}
         suitIcon={suitIcon}
         hand={hand}
+        faceClick={i => this.handleClick(i)}
       />
     );
+  }
+  handleClick(i) {
+    console.log(i);
+    const handCopy = this.props.playerHand.slice();
+    console.log(handCopy);
+    handCopy[i]["faceUp"] = true;
+    this.setState({
+      playerHand: handCopy
+    });
   }
   render() {
     if (this.props.isPlayer) {
