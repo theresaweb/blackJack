@@ -103,7 +103,8 @@ class Game extends React.Component {
       dealerHand: [],
       playerHand: [],
       playerTotal: 0,
-      dealerTotal: 0
+      dealerTotal: 0,
+      isEnabled: true
     };
   }
   componentDidMount() {
@@ -174,12 +175,14 @@ class Game extends React.Component {
           if (playerTotal > 21) {
             this.setState({
               playerIsOver: true,
-              playerTotal: playerTotal
+              playerTotal: playerTotal,
+              isEnabled: false
             });
           } else {
             this.setState({
               playerIsOver: false,
-              playerTotal: playerTotal
+              playerTotal: playerTotal,
+              isEnabled: true
             });
           }
         },
@@ -218,12 +221,14 @@ class Game extends React.Component {
           if (dealerTotal > 21) {
             this.setState({
               dealerIsOver: true,
-              dealerTotal: dealerTotal
+              dealerTotal: dealerTotal,
+              isEnabled: false
             });
           } else {
             this.setState({
               dealerIsOver: false,
-              dealerTotal: dealerTotal
+              dealerTotal: dealerTotal,
+              isEnabled: true
             });
           }
         },
@@ -246,30 +251,27 @@ class Game extends React.Component {
       dealerHand: [],
       playerHand: [],
       playerTotal: 0,
-      dealerTotal: 0
+      dealerTotal: 0,
+      isEnabled: true
     });
     render(<Game key={Uuid4()} />, document.getElementById("game"));
   }
   render() {
     let playerStatus = "";
-    let isEnabled = true;
     let thisPlayerTotal = this.state.playerTotal;
     if (this.state.playerIsOver) {
       playerStatus = "Player loses - total: " + thisPlayerTotal;
-      isEnabled = false;
     } else {
       playerStatus = "Player has " + thisPlayerTotal;
-      isEnabled = true;
     }
     let dealerStatus = "";
     let thisDealerTotal = this.state.dealerTotal;
     if (this.state.dealerIsOver) {
       dealerStatus = "Dealer loses - total: " + thisDealerTotal;
-      isEnabled = false;
     } else {
       dealerStatus = "Dealer has " + thisDealerTotal;
-      isEnabled = true;
     }
+
     if (this.state.error) {
       return (
         <div className="row align-content-center">
@@ -301,7 +303,7 @@ class Game extends React.Component {
                   <div className="col-sm-12">{playerStatus}</div>
                 </div>
                 <button
-                  disabled={!isEnabled}
+                  disabled={!this.state.isEnabled}
                   className="hitmeBtn cols-sm-12"
                   onClick={this.handleAddCardPlayer.bind(this)}
                 >
@@ -321,7 +323,7 @@ class Game extends React.Component {
                   <div className="col-sm-12">{dealerStatus}</div>
                 </div>
                 <button
-                  disabled={!isEnabled}
+                  disabled={!this.state.isEnabled}
                   className="hitmeBtn cols-sm-12"
                   onClick={this.handleAddCardDealer.bind(this)}
                 >
